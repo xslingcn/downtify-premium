@@ -334,11 +334,11 @@ namespace Downtify
             _wr.Close();
 
             // Move File
-            var dir = _downloadPath + escape(GetTrackArtistsNames(_downloadingTrack)) + "\\";
+            var fileName = getUpdatedTrackName(_downloadingTrack);
+            var dir = Path.GetDirectoryName(fileName);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            var fileName = getUpdatedTrackName(_downloadingTrack); ;
             if (GetDownloadType() == DownloadType.OVERWRITE && File.Exists(fileName))
                 File.Delete(fileName);
             File.Move("downloading", fileName);
@@ -493,7 +493,7 @@ namespace Downtify
         private string getUpdatedTrackName(Track track)
         {
             _counter = 0;
-            var dir = _downloadPath + escape(GetTrackArtistsNames(track)) + "\\";
+            var dir = _downloadPath + escape(GetTrackArtistsNames(track)) + "\\" + escape(track.Album().Name()) + "\\";
             var fileExt = ".mp3";
             var fileName = dir + escape(GetTrackFullName(track));
             int fileCount = 0;
