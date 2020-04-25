@@ -126,7 +126,7 @@ namespace Downtify
 
         public static string GetTrackFullName(Track track)
         {
-            return GetTrackArtistsNames(track) + " - " + track.Name();
+            return track.Name();
         }
 
         // TODO: Make these become "real events"
@@ -155,7 +155,7 @@ namespace Downtify
 
         static string _appPath = AppDomain.CurrentDomain.BaseDirectory;
         static string _tmpPath = _appPath + "cache\\";
-        static string _downloadPath = _appPath + "download\\";
+        static string _downloadPath =  "D:\\downify\\";
 
 
         int _counter;
