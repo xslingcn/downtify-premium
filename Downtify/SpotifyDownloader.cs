@@ -493,7 +493,7 @@ namespace Downtify
         private string getUpdatedTrackName(Track track)
         {
             _counter = 0;
-            var dir = _downloadPath + escape(GetTrackArtistsNames(track)) + "\\" + escape(track.Album().Name()) + "\\";
+            var dir = _downloadPath + escape(GetTrackArtistsNames(track)) + "\\" + escape(track.Album().Name()) + " (" + track.Album().Year() +  ")" + "\\";
             var fileExt = ".mp3";
             var fileName = dir + escape(GetTrackFullName(track));
             int fileCount = 0;
