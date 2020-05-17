@@ -92,6 +92,16 @@ namespace Downtify.GUI
             textBoxLink.Placeholder = lang.GetString("download/paste_uri");
 
             downloader.Login(username, password);
+            
+            if(Clipboard.GetText().Contains("spotify"))
+            {
+                string CLIPBOARD_DIALOG = "Clipboard may contain one or more Spotify URLs. Use these?";
+                if (MessageBox.Show(CLIPBOARD_DIALOG, "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes )
+                {
+                    textBoxLink.Text = Clipboard.GetText();
+                    FetchSongsFromUrl(textBoxLink.Text);
+                }
+            }
         }
 
         private void TransferConfig()
