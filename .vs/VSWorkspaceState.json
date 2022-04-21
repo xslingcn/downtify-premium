@@ -3,8 +3,10 @@
     "",
     "\\Downtify",
     "\\Downtify\\GUI",
-    "\\Downtify\\Libs"
+    "\\Downtify\\language",
+    "\\Downtify\\Libs",
+    "\\Downtify\\Properties"
   ],
-  "SelectedNode": "\\Downtify\\SpotifyDownloader.cs",
+  "SelectedNode": "\\Downtify.sln",
   "PreviewInSolutionExplorer": false
 }

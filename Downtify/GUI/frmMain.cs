@@ -6,9 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SpotifySharp;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+using Polly;
 
 namespace Downtify.GUI
 {
@@ -92,16 +90,6 @@ namespace Downtify.GUI
             textBoxLink.Placeholder = lang.GetString("download/paste_uri");
 
             downloader.Login(username, password);
-            
-            if(Clipboard.GetText().Contains("spotify"))
-            {
-                string CLIPBOARD_DIALOG = "Clipboard may contain one or more Spotify URLs. Use these?";
-                if (MessageBox.Show(CLIPBOARD_DIALOG, "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes )
-                {
-                    textBoxLink.Text = Clipboard.GetText();
-                    FetchSongsFromUrl(textBoxLink.Text);
-                }
-            }
         }
 
         private void TransferConfig()
@@ -150,7 +138,7 @@ namespace Downtify.GUI
         private async Task FetchSongsFromUrl(string text)
         {
 
-            string[] urls = text.Split('\n');
+            string[] urls = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string url in urls) {
 
@@ -190,20 +178,6 @@ namespace Downtify.GUI
                         var album = await downloader.FetchAlbum(link);
                         for (int i = 0; i < album.NumTracks(); i++)
                             listBoxTracks.Items.Add(new TrackItem(album.Track(i)));
-                        textBoxLink.Clear();
-                    }
-                    else if (link.ToLower().Contains("artist"))
-                    {
-                        var artist = await downloader.FetchArtist(link);
-
-                        for(int i = 0; i < artist.NumAlbums(); i++)
-                        {
-                            var album = await downloader.FetchAlbum(artist.Album(i));
-                            for (int j = 0; j < album.NumTracks(); j++)
-                                listBoxTracks.Items.Add(new TrackItem(album.Track(j)));
-                        }
-                        for (int i = 0; i < artist.NumTracks(); i++)
-                            listBoxTracks.Items.Add(new TrackItem(artist.Track(i)));
                         textBoxLink.Clear();
                     }
                     else
@@ -286,12 +260,18 @@ namespace Downtify.GUI
             {
                 Debug.WriteLine("in listBoxTracks_SelectedIndexChanged");
                 SetStatusStripLabelText(StatusTextUpdatingTrackInfo);
-                var bmp = await downloader.DownloadImage(((TrackItem)listBoxTracks.SelectedItem).Track, 1);
-                UpdateTrackInfo(track, bmp);
+                await Policy
+                    .Handle<SpotifyWebApi.Model.Exception.InternalServerErrorException>()
+                    .WaitAndRetryForeverAsync(retryAttempt =>
+                        TimeSpan.FromSeconds(1)
+                    )
+                      .ExecuteAsync(async () =>
+                      {
+                          var bmp = await downloader.DownloadImage(((TrackItem)listBoxTracks.SelectedItem).Track, 1);
+                          UpdateTrackInfo(track, bmp);
+                          SetStatusStripLabelText(StatusTextReady);
+                      });
             }
-
-            SetStatusStripLabelText(StatusTextReady);
-
         }
 
         private void UpdateTrackInfo(Track track, Bitmap bmp)
